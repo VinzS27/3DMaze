@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>3D Maze</title>
+
+		<script id="vertex-shader" type="x-shader/x-vertex">
+			attribute vec3 aVertexPosition;
+            attribute vec3 aNormalVector;
+			attribute vec4 aVertexColor;
+
+            uniform mat4 modelView;
+            uniform mat4 projection;
+
+            uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+            uniform vec4 lightPos;
+            uniform float shininess;
+            
+            //variable to share with the fragment shader
+            varying mediump vec4 vColor;
+			
+			void main(void) {
+
+                vec3 pos = (modelView * vec4(aVertexPosition,0.0)).xyz;
+        
+                //fix light position
+                vec3 light = lightPos.xyz;
+                vec3 L = normalize( light - pos );
+
+                vec3 E = normalize( -pos );
+                vec3 H = normalize( L + E );
+                
+                vec4 NN = vec4(aNormalVector, 0);
+
+                // Transform vertex normal into eye coordinates
+                vec3 N = normalize( (modelView * NN).xyz);
+
+                // Compute ambient,diffuse,specular
+                vec4 ambient = ambientProduct;
+
+                float Kd = max( dot(L, N), 0.0 );
+                vec4  diffuse = Kd * diffuseProduct;
+
+                float Ks = pow( max(dot(N, H), 0.0), shininess );
+                vec4  specular = Ks * specularProduct;
+                
+                if( dot(L, N) < 0.0 ) {
+                    specular = vec4(0.0, 0.0, 0.0, 1.0);
+                } 
+
+                gl_Position = projection * modelView * vec4(aVertexPosition, 1.0);
+				vColor = aVertexColor * (ambient + diffuse + specular);
+			}
+		</script>
+
+        <script id="fragment-shader" type="x-shader/x-fragment">
+			varying mediump vec4 vColor;
+      		void main(void) {
+        		gl_FragColor = vColor;
+      		}
+        </script>
+		<script id="context" type="text/javascript" src="context.js"></script>
+		<script id="Shaders"     type="text/javascript" src="Shaders.js"></script> 
+		<script id="Operations"  type="text/javascript" src="Operations.js"></script>
+		<script id="maze"        type="text/javascript" src="maze.js"></script>
+	</head>
+	<body>
+        <h1><strong>
+            Use the arrow keys to move through the maze from the green to the red cell
+        </h1></strong>
+		<canvas id="gl-canvas" width="1000" height="500">
+		</canvas>
+	</body>
+</html>
