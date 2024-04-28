@@ -1,4 +1,4 @@
-<h1 align="center" id="title">Maze 3D WebGL</h1>
+<h1 align="center" id="title">3D Maze WebGL</h1>
 
 <h2>Description:</h2>
 <p id="description">Click on "mazedemo.html" to get started. </p> 
